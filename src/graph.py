@@ -28,18 +28,18 @@ class Path:
         self.current_node = edge.to_node
         self.visited_edge.append(edge)
         self.current_bearing = edge.bearing
-        self.distance+=edge.distance
+        self.distance+=edge.length
     
     def __str__(self):
         path = []
-        path.append((self.starting_node.id))
+        path.append(self.starting_node.intersection)
         for edge in self.visited_edge:
-            path.append('->')
+            path.append(' -> ')
             path.append(edge.stname)
-            path.append('->')
-            path.append(edge.to_node)
-        print(''.join(path))
-        return
+            path.append(' -> ')
+            path.append(edge.to_node.intersection)
+        
+        return ''.join(path)
 
 class Graph:
     def __init__(self):
@@ -84,7 +84,9 @@ class Graph:
         for edge in self.adjacency.get(node, []):
             rows.append({
             "from_node": edge.from_node.id,
+            'from_node_obj':edge.from_node,
             "to_node": edge.to_node.id,
+            'to_node_obj':edge.to_node,
             'from_intersection':edge.from_node.intersection,
             'to_intersection':edge.to_node.intersection,
             "street_name": edge.stname,
