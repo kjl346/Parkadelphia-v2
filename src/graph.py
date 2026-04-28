@@ -14,6 +14,33 @@ class Edge:
         self.oneway = oneway
         self.bearing = bearing
 
+class Path:
+    def __init__(self,starting_node):
+        self.distance = 0
+        self.current_bearing = 0
+        self.visited_edge = []
+        self.path_nodes = [starting_node]
+        self.current_node = starting_node
+        self.starting_node = starting_node
+
+    def drive_edge(self,edge):
+        self.path_nodes.append(edge.to_node)
+        self.current_node = edge.to_node
+        self.visited_edge.append(edge)
+        self.current_bearing = edge.bearing
+        self.distance+=edge.distance
+    
+    def __str__(self):
+        path = []
+        path.append((self.starting_node.id))
+        for edge in self.visited_edge:
+            path.append('->')
+            path.append(edge.stname)
+            path.append('->')
+            path.append(edge.to_node)
+        print(''.join(path))
+        return
+
 class Graph:
     def __init__(self):
         self.nodes = {}
@@ -50,8 +77,9 @@ class Graph:
         for edge in self.edges:
             adjacency[edge.from_node].append(edge)
         self.adjacency=adjacency
-    def show_node_adjacency(self, node_id):
-        rows = []
+    def show_node_adjacency(self, node_id,rows = []):
+        
+        
         node = self.nodes.get(node_id,'')
         for edge in self.adjacency.get(node, []):
             rows.append({
@@ -62,9 +90,22 @@ class Graph:
             "street_name": edge.stname,
             "length": edge.length,
             "oneway": edge.oneway,
-            'bearing' : edge.bearing
+            'bearing' : edge.bearing,
+            'edge':edge
         })
         return pd.DataFrame(rows)
+    def search(self,current_node,start_node,path,distance):
+        if distance == 0 :
+            current_node = start_node 
+            best_loop = None
+        if distance > 10000:
+            return 
+        if current_node == start_node:
+            return 
+
+        
+        for ind,next_edge in self.show_node_adjacency(current_node):
+            search(next_edge.to_node,start_node,)
     def get_neighbors(self,start_node,max_depth =2):
         visited = {start_node}
         queue = ([(start_node,0)])
