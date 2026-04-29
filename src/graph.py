@@ -29,6 +29,15 @@ class Path:
         self.visited_edge.append(edge)
         self.current_bearing = edge.bearing
         self.distance+=edge.length
+
+    def copy(self):
+        path = Path(self.starting_node)
+        path.distance = self.distance
+        path.current_bearing = self.current_bearing
+        path.visited_edge = self.visited_edge.copy()
+        path.path_nodes = self.path_nodes.copy()
+        path.current_node = self.current_node
+        return path
     
     def __str__(self):
         path = []
@@ -77,10 +86,11 @@ class Graph:
         for edge in self.edges:
             adjacency[edge.from_node].append(edge)
         self.adjacency=adjacency
-    def show_node_adjacency(self, node_id,rows = []):
-        
-        
-        node = self.nodes.get(node_id,'')
+    def show_node_adjacency(self, node_id,rows = None):
+        if rows is None:
+            rows = []
+
+        node = node_id if isinstance(node_id, Node) else self.nodes.get(node_id,'')
         for edge in self.adjacency.get(node, []):
             rows.append({
             "from_node": edge.from_node.id,
@@ -96,18 +106,24 @@ class Graph:
             'edge':edge
         })
         return pd.DataFrame(rows)
-    def search(self,current_node,start_node,path,distance):
-        if distance == 0 :
-            current_node = start_node 
-            best_loop = None
-        if distance > 10000:
-            return 
-        if current_node == start_node:
-            return 
+    def bfs_search(self,start_node):
+        starting_path = deque([Path(starting_node=start_node)])
 
-        
-        for ind,next_edge in self.show_node_adjacency(current_node):
-            search(next_edge.to_node,start_node,)
+        while starting_path:
+            current_path = starting_path.popleft()
+
+            if current_path.distance > 0 and current_path.starting_node.id == current_path.current_node.id:
+                return current_path
+
+            for edge in self.adjacency.get(current_path.current_node, []):
+                if edge.to_node in current_path.path_nodes and edge.to_node.id != start_node.id:
+                    continue
+                new_path = current_path.copy()
+                new_path.drive_edge(edge)
+                starting_path.append(new_path)
+
+        return None
+
     def get_neighbors(self,start_node,max_depth =2):
         visited = {start_node}
         queue = ([(start_node,0)])
