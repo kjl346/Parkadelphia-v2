@@ -4,6 +4,9 @@ class Node:
     def __init__(self, id,intersection):
         self.id = int(id)
         self.intersection = intersection
+    def __repr__(self):
+        return f"Node(id={self.id}, intersection='{self.intersection}')"
+
         
 class Edge:
     def __init__(self, from_node, to_node, length, stname, oneway,bearing):
@@ -13,6 +16,12 @@ class Edge:
         self.stname = stname
         self.oneway = oneway
         self.bearing = bearing
+    def __repr__(self):
+        return (
+            f"Edge(from={self.from_node.id}, to={self.to_node.id}, "
+            f"street='{self.stname}', length={self.length}, "
+            f"oneway='{self.oneway}', bearing={self.bearing})"
+        )
 
 class Path:
     def __init__(self,starting_node):
