@@ -1,5 +1,13 @@
 from collections import defaultdict,deque
 import pandas as pd
+from rapidfuzz import process, fuzz
+
+
+POSSIBLE_STREET_SUFFIXES = ['STR','AVE','RD','ST']
+
+def normalize_streetname(stname):
+    return str(stname).upper().strip()
+
 class Node: 
     def __init__(self, id,intersection):
         self.id = int(id)
@@ -9,18 +17,20 @@ class Node:
 
         
 class Edge:
-    def __init__(self, from_node, to_node, length, stname, oneway,bearing):
+    def __init__(self, from_node, to_node, length, stname, oneway,bearing,block):
         self.from_node = from_node
         self.to_node = to_node
         self.length = length
         self.stname = stname
         self.oneway = oneway
         self.bearing = bearing
+        self.block = block
     def __repr__(self):
         return (
             f"Edge(from={self.from_node.id}, to={self.to_node.id}, "
+            f"block={self.block},"
             f"street='{self.stname}', length={self.length}, "
-            f"oneway='{self.oneway}', bearing={self.bearing})"
+            f"oneway='{self.oneway}', bearing={self.bearing})\n"
         )
 
 class Path:
@@ -65,6 +75,8 @@ class Graph:
         self.nodes = {}
         self.edges = []
         self.adjacency = {}
+        self.street_index = defaultdict(list)
+        self.street_names = set()
 
     def get_or_create_node(self,node_id: int,intersection):
         
@@ -79,24 +91,36 @@ class Graph:
                     length, 
                     stname, 
                     oneway,
-                    bearing):
+                    bearing,
+                    block):
+        #uppercase
+
+        stname = normalize_streetname(stname)
+
         from_node = self.get_or_create_node(from_node_id,
                                             from_node_intersection)
         to_node = self.get_or_create_node(to_node_id,
                                           to_node_intersection)
+        
+
         edge = Edge(from_node = from_node,
                         to_node =  to_node, 
                         length = length,  
                         stname = stname,
                         oneway = oneway,
-                        bearing=bearing)
+                        bearing=bearing,
+                        block=block)
+        
+        self.street_names.add(stname)
+        self.street_index[stname].append(edge)
         self.edges.append(edge)
+
     def build_adjacency(self):
         adjacency = defaultdict(list)
-        
         for edge in self.edges:
             adjacency[edge.from_node].append(edge)
         self.adjacency=adjacency
+
     def show_node_adjacency(self, node_id,rows = None):
         if rows is None:
             rows = []
@@ -136,9 +160,39 @@ class Graph:
         return None
 
 
-    def query_streets(self,stname):
+    def query_streets(self,stname,exact=True,limit = 5,score_cutoff = 75):
+        stname = normalize_streetname(stname)
+        print(stname)
+        if not exact:
+            matches = process.extract(
+                stname,
+                self.street_names,
+                scorer = fuzz.WRatio,
+                limit = limit,
+                score_cutoff = score_cutoff
+            )
+            
+            matched_edges = []
+            for street_name,score,_ in matches:
+                matched_edges.append(self.street_index[street_name])
+
+            return matched_edges,matches
+        else:
         
-        pass
+            for suffix in POSSIBLE_STREET_SUFFIXES:
+                if suffix not in stname:
+                    st_with_suffix = stname + ' ' + suffix
+                    #print(st_with_suffix,len(st_with_suffix))
+                else:
+                    st_with_suffix = stname.replace(suffix,'').strip() + ' ' + suffix
+                    print(st_with_suffix,len(st_with_suffix))
+
+                if st_with_suffix in self.street_index:
+                    return self.street_index[st_with_suffix]
+        
+            return []
+
+        
 
     def get_neighbors(self,start_node,max_depth =2):
         visited = {start_node}
