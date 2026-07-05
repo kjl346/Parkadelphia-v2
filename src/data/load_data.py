@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from graph import Graph
+from data.preprocess import normalize_streetname
 import duckdb
 def build_graph(
         streets_path,
@@ -51,12 +52,9 @@ def build_graph(
     print(full_ds.columns)
     for ind, data in full_ds[(full_ds.oneway.str.strip() != '')].iterrows():
 
-
-        
-
-
-
         edge_specs = []
+
+        normalized_streetname = normalize_streetname(data.stname)
 
         if data.oneway in ('B','FT'):
             edge_specs.append((data.fnode_,
@@ -86,7 +84,7 @@ def build_graph(
                 from_node_intersection=f_inter,
                 to_node_intersection=t_inter,
                 length=data.length,
-                stname=data.stname,
+                stname = normalized_streetname,
                 oneway=data.oneway,
                 bearing=edge_bearing,
                 f_block=f_block,
