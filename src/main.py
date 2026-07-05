@@ -24,12 +24,17 @@ def main():
                 parking_permit_blocks_path = parking_permit_blocks_path,
                 meters_path = meters_path)
 
+    
+
+    
     x = philly_streets.show_node_adjacency(3)
+    print(x.head())
     path = philly_streets.bfs_search(x.to_node_obj[0])
     print(philly_streets.query_streets('arch st'
-                                       #,exact=False
+                                        #,exact=False
                                        )[1]
                                        )
+    
             
 
 if __name__ == '__main__':

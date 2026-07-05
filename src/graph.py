@@ -17,20 +17,20 @@ class Node:
 
         
 class Edge:
-    def __init__(self, from_node, to_node, length, stname, oneway,bearing,block):
+    def __init__(self, from_node, to_node, length, stname, oneway,bearing,f_block,t_block):
         self.from_node = from_node
         self.to_node = to_node
         self.length = length
         self.stname = stname
         self.oneway = oneway
         self.bearing = bearing
-        self.block = block
+        self.f_block = f_block
+        self.t_block = t_block
     def __repr__(self):
         return (
-            f"Edge(from={self.from_node.id}, to={self.to_node.id}, "
-            f"block={self.block},"
-            f"street='{self.stname}', length={self.length}, "
-            f"oneway='{self.oneway}', bearing={self.bearing})\n"
+            f"Edge(from= {self.f_block} {self.stname} at {self.from_node.intersection}"
+            f" to= {self.t_block} {self.stname}  at {self.to_node.intersection},"
+            f"oneway='{self.oneway}', bearing={self.bearing} length={self.length})\n"
         )
 
 class Path:
@@ -92,7 +92,8 @@ class Graph:
                     stname, 
                     oneway,
                     bearing,
-                    block):
+                    f_block,
+                    t_block):
         #uppercase
 
         stname = normalize_streetname(stname)
@@ -109,7 +110,8 @@ class Graph:
                         stname = stname,
                         oneway = oneway,
                         bearing=bearing,
-                        block=block)
+                        f_block=f_block,
+                        t_block=t_block)
         
         self.street_names.add(stname)
         self.street_index[stname].append(edge)
@@ -203,3 +205,4 @@ class Graph:
             node, depth = queue.popleft()
             for node in self.adjacency.get(node,[]):
                 pass
+    
