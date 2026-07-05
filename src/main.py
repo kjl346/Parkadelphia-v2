@@ -26,7 +26,7 @@ def main():
 
     
 
-    
+    print(philly_streets.block_index)
     x = philly_streets.show_node_adjacency(3)
     print(x.head())
     path = philly_streets.bfs_search(x.to_node_obj[0])

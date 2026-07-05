@@ -15,6 +15,18 @@ class Node:
     def __repr__(self):
         return f"Node(id={self.id}, intersection='{self.intersection}')"
 
+class Block:
+    def __init__(self,street_name,block_number,from_address = None,to_address = None):
+        self.streetname = street_name
+        self.block_number = block_number
+        self.from_address = from_address
+        self.to_address = to_address
+    def __repr__(self):
+        return (
+            f"Block({self.streetname} {self.block_number} block from {self.from_address} to {self.to_address})"
+
+        )
+
         
 class Edge:
     def __init__(self, from_node, to_node, length, stname, oneway,bearing,f_block,t_block):
@@ -74,8 +86,9 @@ class Graph:
     def __init__(self):
         self.nodes = {}
         self.edges = []
-        self.adjacency = {}
+        self.adjacency = defaultdict(list)
         self.street_index = defaultdict(list)
+        self.block_index = defaultdict(list)
         self.street_names = set()
 
     def get_or_create_node(self,node_id: int,intersection):
@@ -83,6 +96,18 @@ class Graph:
         if node_id not in self.nodes:
             self.nodes[node_id] = Node(node_id,intersection)
         return self.nodes[node_id]
+    
+    def add_block(
+        self,
+        street_name,
+        block_number,
+        from_block,
+        to_block
+    ):
+        new_block = Block(street_name,block_number,from_block,to_block)
+        self.block_index[(street_name,block_number)].append(new_block)
+        
+
     def add_edge(self, 
                     from_node_id,
                     from_node_intersection,

@@ -63,7 +63,9 @@ def build_graph(
                                data.intersecti_from,
                                data.intersecti_to,
                                data.r_f_add,
-                               data.r_t_add))
+                               data.r_t_add,
+                               data.r_hundred))
+            
         if data.oneway in ('B','TF'):
             opposite = (data.bearing + 180) % 360
             if opposite > 180:
@@ -75,9 +77,10 @@ def build_graph(
                                data.intersecti_to,
                                data.intersecti_from,
                                data.l_t_add,
-                               data.l_f_add))
+                               data.l_f_add,
+                               data.l_hundred))
 
-        for from_id, to_id, edge_bearing,f_inter,t_inter,f_block,t_block in edge_specs:
+        for from_id, to_id, edge_bearing,f_inter,t_inter,f_block,t_block,block_number in edge_specs:
             philly_streets.add_edge(
                 from_node_id=from_id,
                 to_node_id=to_id,
@@ -89,6 +92,12 @@ def build_graph(
                 bearing=edge_bearing,
                 f_block=f_block,
                 t_block=t_block
+            )
+            philly_streets.add_block(
+                street_name=normalized_streetname,
+                block_number=block_number,
+                from_block=f_block,
+                to_block = t_block
             )
     philly_streets.build_adjacency()
     #merge streets & centerlines to get more info 
